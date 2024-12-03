@@ -1,0 +1,257 @@
+openapi: 3.0.3
+info:
+  title: TMF674 Geographic Site Management API
+  description:  >
+    Esta API sigue el estándar TMF674 del TM Forum y se utiliza para el proceso de gestión 
+    de las ubicaciones de los clientes asociados a la plataforma de Claro Ecuador. 
+    Permite realizar actualizaciones parciales o totales de la información de las direcciones 
+    de los clientes.
+  version: 4.0.0
+  x-specification-version: 4.0.0
+  x-service-id: geographicSiteManagement
+  x-release: 4.0.0
+  x-documentation: https://example.com/docs/tmf674/v4
+servers:
+  - url: https://{api}:{port}/geographicSiteManagement/v4/
+
+paths:
+  /geographicSite/{id}:
+    patch:
+      summary: Actualizar dirección de un cliente
+      description: >
+        Actualiza de manera parcial o total la información de la dirección de un cliente 
+        asociado a la plataforma de Claro Ecuador. La operación permite modificar los 
+        atributos específicos del recurso identificado por su ID único.
+      operationId: patchGeographicSite
+      tags:
+        - GeographicSite
+      security:
+        - OAuth2: [write]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the Geographic Site resource.
+          schema:
+            type: string
+        - name: fields
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "id"
+
+        - name: Accept-Language
+          in: header
+          required: false
+          description: "Indica el idioma preferido para la respuesta."
+          schema:
+            type: string
+            example: "es"
+        - name: If-NoneMatch
+          in: header
+          required: false
+          description: "Se utiliza para la validación de caché, permitiendo al servidor saber si el recurso ha cambiado."
+          schema:
+            type: string
+            example: "W/\"etag\""
+        - name: X-External-Trx-Id
+          in: header
+          required: false
+          description: "UUID de máximo 100 caracteres de tipo string."
+          schema:
+            type: string
+            example: "external-transaction-id"
+        - name: X-OriginChannel
+          in: header
+          required: false
+          description: "Canal por el que proviene la petición. De tipo int."
+          schema:
+            type: integer
+            example: 1
+        - name: x-operation-id
+          in: header
+          required: false
+          description: "De tipo string. Nombre de la operación que se va a realizar."
+          schema:
+            type: string
+            example: "operation-id-123"
+      requestBody:
+        description: Fields to update in the Geographic Site resource.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeographicSiteUpdate'
+      responses:
+        '200':
+          description: Successfully updated the Geographic Site resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeographicSite'
+        '400':
+          description: Invalid request, such as validation errors.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized access. Token is invalid or missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. Client does not have permissions for the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Geographic Site resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: OAuth 2.0 authentication for API access.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/oauth/authorize
+          tokenUrl: https://auth.example.com/oauth/token
+          scopes:
+            write: Grants write access to resources.
+  schemas:
+    GeographicSiteUpdate:
+      type: object
+      description: Payload for updating a Geographic Site resource.
+      properties:
+        geographicAddress:
+          $ref: '#/components/schemas/GeographicAddress'
+        header:
+          $ref: '#/components/schemas/Header'
+        additionalFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalField'
+    GeographicSite:
+      type: object
+      description: Representation of a Geographic Site resource.
+      properties:
+        id:
+          type: string
+        geographicAddress:
+          $ref: '#/components/schemas/GeographicAddress'
+    GeographicAddress:
+      type: object
+      description: Representation of a Geographic Address.
+      properties:
+        country:
+          type: string
+        stateOrProvince:
+          type: string
+        city:
+          type: string
+        locality:
+          type: string
+        sector:
+          type: string
+        streetType:
+          type: string
+        street1:
+          type: string
+        street2:
+          type: string
+        streetNr:
+          type: string
+        block:
+          type: string
+        buildingName:
+          type: string
+        levelNumber:
+          type: string
+        levelType:
+          type: string
+        reference:
+          type: string
+        geoCode:
+          type: object
+          properties:
+            latitude:
+              type: string
+            longitude:
+              type: string
+        branchName:
+          type: string
+    Header:
+      type: object
+      description: Optional metadata included in the request body.
+      properties:
+        channelId:
+          type: string
+        companyId:
+          type: string
+        consumerId:
+          type: string
+        consumerProfileId:
+          type: string
+        externalOperation:
+          type: string
+        externalTransactionDate:
+          type: string
+        externalTransactionId:
+          type: string
+        internalTransactionId:
+          type: string
+        terminal:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        geoReferenceInfo:
+          type: object
+          properties:
+            latitude:
+              type: string
+            longitude:
+              type: string
+            azimuth:
+              type: string
+            cellId:
+              type: string
+    AdditionalField:
+      type: object
+      description: Represents additional fields for a resource.
+      properties:
+        id:
+          type: string
+        value:
+          type: string
+        dataType:
+          type: string
+    ErrorResponse:
+      type: object
+      description: Standard error response structure.
+      properties:
+        code:
+          type: string
+        status:
+          type: string
+        message:
+          type: string
+        transactionId:
+          type: string
+        timestamp:
+          type: string

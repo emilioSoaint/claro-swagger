@@ -1,0 +1,184 @@
+openapi: 3.0.3
+info:
+  title: TMF653 Gestión de Pruebas de Servicio - Claro Ecuador
+  description: >
+    Esta API sigue el estándar TMF653 del TM Forum y se utiliza para gestionar y obtener detalles 
+    sobre las pruebas de servicio realizadas en la plataforma de Claro Ecuador. Permite consultar 
+    el estado y la información de las pruebas de servicio con base en el identificador de la prueba.
+  version: 4.0.0
+  x-specification-version: 4.0.0
+  x-service-id: serviceTestManagement
+  x-release: 4.0.0
+  x-documentation: https://example.com/docs/tmf653/v4
+servers:
+  - url: https://{api}:{port}/serviceTestManagement/v4
+paths:
+  /serviceTest/{id}:
+    get:
+      summary: Obtener información de prueba de servicio
+      description: >
+        En esta operación se obtiene información sobre una prueba de servicio específica utilizando 
+        el identificador de la prueba. Los parámetros de consulta permiten filtrar la información 
+        que se desea recuperar, como el ID, la descripción y la especificación del recurso.
+      operationId: getServiceTest
+      tags:
+        - ServiceTest
+      security:
+        - OAuth2: [read]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador único de la prueba de servicio.
+          schema:
+            type: string
+        - name: fields
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "id,description"
+        - name: resourceSpecification
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "technology"
+        - name: Accept-Language
+          in: header
+          required: false
+          description: "Indica el idioma preferido para la respuesta."
+          schema:
+            type: string
+            example: "es"
+        - name: If-NoneMatch
+          in: header
+          required: false
+          description: "Se utiliza para la validación de caché, permitiendo al servidor saber si el recurso ha cambiado."
+          schema:
+            type: string
+            example: "W/\"etag\""
+        - name: X-External-Trx-Id
+          in: header
+          required: false
+          description: "UUID de máximo 100 caracteres de tipo string."
+          schema:
+            type: string
+            example: "external-transaction-id"
+        - name: X-OriginChannel
+          in: header
+          required: false
+          description: "Canal por el que proviene la petición. De tipo int."
+          schema:
+            type: integer
+            example: 1
+        - name: x-operation-id
+          in: header
+          required: false
+          description: "De tipo string. Nombre de la operación que se va a realizar."
+          schema:
+            type: string
+            example: "operation-id-123"
+      responses:
+        '200':
+          description: Información de prueba de servicio obtenida exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceTestResponse'
+        '400':
+          description: Solicitud inválida. Parámetros incorrectos o faltantes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Acceso no autorizado. Token inválido o ausente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No se encontró la prueba de servicio.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: Autenticación OAuth 2.0 para acceder a la API.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/oauth/authorize
+          tokenUrl: https://auth.example.com/oauth/token
+          scopes:
+            read: Permite acceso de lectura a los recursos.
+  schemas:
+    ServiceTestResponse:
+      type: object
+      description: Respuesta con la información de la prueba de servicio.
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        transactionId:
+          type: string
+        timestamp:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+            description:
+              type: string
+            startDateTime:
+              type: string
+              format: date-time
+            endDateTime:
+              type: string
+              format: date-time
+            mode:
+              type: string
+            state:
+              type: string
+            validFor:
+              type: object
+              properties:
+                startDateTime:
+                  type: string
+                  format: date-time
+                endDateTime:
+                  type: string
+                  format: date-time
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        status:
+          type: string
+        transactionId:
+          type: string
+        timestamp:
+          type: string
+        message:
+          type: string
+        errorDetails:
+          type: object
+          properties:
+            mensaje:
+              type: string
+            errorCode:
+              type: string
+  
