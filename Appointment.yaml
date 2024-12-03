@@ -11,7 +11,7 @@ info:
   x-release: 4.0.0
   x-documentation: https://example.com/docs/tmf646/v4
 servers:
-  - url: https://{api}:{port}/appointment/v4
+  - url: /appointment/v4
 paths:
   /searchTimeSlot:
     get:
